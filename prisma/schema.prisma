@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  //output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,28 +14,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        String      @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String   @db.VarChar(255)
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [id], references: [id])
-  authorId  Int
-}
-
-model Profile {
-  id     String     @id @default(uuid())
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id])
-  userId String     @unique
-}
+// Each user can:
+// Write multiple reviews
+// Leave multiple comments
 
 model User {
-  id      String      @id @default(uuid())
-  email   String   @unique
-  name    String?
-  posts   Post[]
-  profile Profile?
+  id        String    @id @default(uuid())
+  email     String    @unique
+  username  String
+  password  String
+  reviews   Review[]  // array for reviews 
+  comments  Comment[] // array for comments
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Item {
+  id        String    @id @default(uuid())
+  name      String
+  description String
+  reviews   Review[]  // array for reviews 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+
+// Each review is:
+// Written by one User
+// Belongs to one Item
+// Can have multiple comments
+// prisma
+// Copy
+// Edit
+
+model Review {
+  id        String   @id @default(uuid())
+  text      String
+  rating    Int      // maybe enforce 1-5 in validation
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  item      Item     @relation(fields: [itemId], references: [id])
+  itemId    String
+  comments  Comment[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, itemId]) // enforce 1 review per item per user
+}
+
+// Each comment:
+// Is written by a user
+// Belongs to a review
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  review    Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade) //delete review from comments array
+  reviewId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

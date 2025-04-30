@@ -1,0 +1,14 @@
+
+
+Incoming Request URL ➔ Express checks routes in ORDER they are defined
+
+1️⃣ Does it match router.use("/:itemId/reviews", reviewRouter)?
+    └── If URL is like /items/abc123/reviews → YES ✅ handled by reviewRouter
+
+2️⃣ Else, does it match router.get("/", getAllItems)?
+    └── If URL is exactly /items → YES ✅ handled by getAllItems
+
+3️⃣ Else, does it match router.get("/:itemId", getSingleItem)?
+    └── If URL is like /items/abc123 → YES ✅ handled by getSingleItem
+
+4️⃣ Else, 404 Not Found
